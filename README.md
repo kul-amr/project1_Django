@@ -15,3 +15,8 @@ This application has following features :
 	* A table listing all users with consumption details
 * 'Detail' view	:
 	* A line chart showing the consumption of an individual consumer, and a list of fields such as tariff, area, etc
+	
+
+![Alt text](/summary_screen.png?raw=true "Summary"	
+![Alt text](/summary_popup.png?raw=true "Summary Popup"
+![Alt text](/detail_screen.png?raw=true "Detail"
