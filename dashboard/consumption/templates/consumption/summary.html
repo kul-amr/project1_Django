@@ -1,0 +1,228 @@
+{% extends 'consumption/layout.html' %}
+
+{% block content %}
+
+<!--<h1>{{message}}</h1>-->
+<style>
+table, td, th {
+    border: 1px solid black;
+}
+table{
+width: 30%;
+border-collapse: collapse;
+}
+th {
+    height: 50px;
+}
+.close{
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 60px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+</style>
+<h4 align="center">Total Consumption</h4>
+
+<div id="tot_cnsmp_chart"></div>
+<div>
+    <table align="center">
+        <caption>User Consumption Data</caption>
+        <thead>
+            <th >User</th>
+            <th>Consumption</th>
+        </thead>
+        {% for uc in users_data%}
+            <tr>
+                <td>{{ uc.user_id }}</td>
+                <td>{{ uc.val }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+<div id="distrbModal" class="modal">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <div>
+            <table id="top_consumers" align="center">
+            <caption>Top Consumers</caption>
+                <thead>
+                    <th>User</th>
+                    <th>Area</th>
+                    <th>Tariff</th>
+                    <th>Consumption</th>
+                </thead>
+            </table>
+        </div>
+        <div>
+            <h5 align="center">Area Distribution</h5>
+            <div id="area_cnsmp_chart"></div>
+        </div>
+        <div>
+            <h5 align="center">Tariff Distribution</h5>
+            <div id="tariff_cnsmp_chart"></div>
+        </div>
+    </div>
+</div>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.css"rel="stylesheet" />
+<script src="http://d3js.org/d3.v3.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+
+
+<script type="text/javascript">
+var data_out =JSON.parse("{{ summ_data|escapejs }}");
+
+for(var i=0;i<data_out.length;i++){
+  data_out[i]['cnsmpt_date'] = new Date (data_out[i]['cnsmpt_date']);
+};
+
+var distrb_modal = document.getElementById('distrbModal');
+var close_modal = document.getElementById('closeModal');
+
+close_modal.onclick = function() {
+    distrb_modal.style.display = "none";
+}
+
+window.onclick = function(event) {
+    if (event.target == distrb_modal) {
+        distrb_modal.style.display = "none";
+    }
+}
+
+
+var chart = c3.generate({
+  bindto : '#tot_cnsmp_chart',
+  data :{
+    json :data_out,
+    keys: {
+      x:'cnsmpt_date',
+      value:['val']
+    },
+    names:{
+    val : 'Total Consumption',
+        },
+    onclick:pop_day
+  },
+  axis:{
+    x:{
+      label:{
+        text:'Consumption Date',
+        position:'outer-middle'
+      },
+      type:'timeseries',
+      localtime:false,
+      tick:{
+        format:'%Y-%m-%d'
+      }
+    },
+    y:{
+      label:{
+        text:'Total Consumption Value',
+        position:'outer-middle'
+      }
+    }
+  },
+  grid: {
+        x: {
+            show: true
+        },
+        y: {
+            show: true
+        }
+    }
+});
+
+function pop_day(d,i){
+        dateFormat= d3.time.format("%Y-%m-%d");
+        var start_date = dateFormat(d.x);
+        var in_date = new Date(d.x);
+        in_date.setDate(in_date.getDate()+1);
+        var end_date =dateFormat(in_date)
+        console.log(start_date,end_date);
+
+        $.getJSON('/date_summary/?start_date='+start_date+'&end_date='+end_date, function(d) {
+                     console.log("it is ",d);
+                  var top_users_tab = $("#top_consumers");
+                  $("#top_consumers tr").remove();
+                  $.each(d.top_data,function(idx,elem){
+                        top_users_tab.append("<tr><td>"+elem.user_id+"</td><td>"+elem.area+"</td><td>"+elem.tariff+"</td><td>"+elem.val+"</td></tr>")
+                  });
+
+                  var area_dt =d.area_data;
+                  var tariff_dt =d.tariff_data;
+
+                  var area_data = {};
+                  var area_keys = [];
+                  area_dt.forEach(function(e) {
+                        area_keys.push(e.area);
+                        area_data[e.area] = e.val;
+                  })
+                  var tariff_data = {};
+                  var tariff_keys = [];
+                  tariff_dt.forEach(function(e) {
+                        tariff_keys.push(e.tariff);
+                        tariff_data[e.tariff] = e.val;
+                  })
+
+                  var area_chart = c3.generate({
+                         bindto : '#area_cnsmp_chart',
+                         data:{
+                            json:[area_data],
+                            keys:{
+                                value:area_keys,
+                            },
+                            type:'pie'
+                         },
+                         tooltip: {
+                                      format: {
+                                        value: function (area_data) { return area_data; }
+                                      }
+                                  }
+                  });
+                  var tariff_chart = c3.generate({
+                         bindto : '#tariff_cnsmp_chart',
+                         data:{
+                            json:[tariff_data],
+                            keys:{
+                                value:tariff_keys,
+                            },
+                            type:'pie'
+                         },
+                         tooltip: {
+                                      format: {
+                                        value: function (tariff_data) { return tariff_data; }
+                                      }
+                                  }
+                  });
+
+              });
+
+        distrb_modal.style.display = "block";
+};
+
+</script>
+
+{% endblock %}

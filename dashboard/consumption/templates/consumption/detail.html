@@ -1,0 +1,91 @@
+{% extends 'consumption/layout.html' %}
+
+{% block content %}
+<style>
+table, td, th {
+    border: 1px solid black;
+}
+table{
+width: 30%;
+border-collapse: collapse;
+}
+th {
+    height: 50px;
+}
+</style>
+<h4 align="center">User Consumption</h4>
+
+<div id="usr_cnsmp_chart"></div>
+<div>
+    <table align="center">
+        <caption>User Details</caption>
+        <thead>
+            <th>User</th>
+            <th>Area</th>
+            <th>Tariff</th>
+        </thead>
+            <tr>
+                <td>{{ usr_dt.user_id }}</td>
+                <td>{{ usr_dt.area }}</td>
+                <td>{{ usr_dt.tariff }}</td>
+            </tr>
+    </table>
+</div>
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.css"rel="stylesheet" />
+<script src="http://d3js.org/d3.v3.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+
+<script type="text/javascript">
+var data_out =JSON.parse("{{ u_data|escapejs }}");
+
+for(var i=0;i<data_out.length;i++){
+  data_out[i]['cnsmpt_date'] = new Date (data_out[i]['cnsmpt_date']);
+};
+
+
+var chart = c3.generate({
+  bindto : '#usr_cnsmp_chart',
+  data :{
+    json :data_out,
+    keys: {
+      x:'cnsmpt_date',
+      value:['val']
+    },
+    names:{
+    val : 'User Consumption',
+        }
+  },
+  axis:{
+    x:{
+      label:{
+        text:'Consumption Date',
+        position:'outer-middle'
+      },
+      type:'timeseries',
+      localtime:false,
+      tick:{
+        format:'%Y-%m-%d'
+      }
+    },
+    y:{
+      label:{
+        text:'User Consumption Value',
+        position:'outer-middle'
+      }
+    }
+  },
+  grid: {
+        x: {
+            show: true
+        },
+        y: {
+            show: true
+        }
+    }
+});
+
+</script>
+
+{% endblock %}
