@@ -16,4 +16,11 @@ This application has following features :
 * 'Detail' view	:
 	* A line chart showing the consumption of an individual consumer, and a list of fields such as tariff, area, etc
 	
+sample urs to get data :
 
+http://localhost:8000/detail/?start_date=2016-08-12&end_date=2016-08-20&user_id=3002
+http://localhost:8000/?start_date=2016-08-12&end_date=2016-08-20
+or 
+http://localhost:8000/summary/?start_date=2016-08-12&end_date=2016-08-20
+
+(shared screen captures of web pages-graphs)
