@@ -1,4 +1,3 @@
-## This is a work-in-progress project
 
 # project1_Django
 
