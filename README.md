@@ -1,5 +1,4 @@
 
-# project1_Django
 
 #### Background
 
