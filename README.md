@@ -1,5 +1,6 @@
 
 
+
 #### Background
 
 I have created a basic Django site with data as- small dataset of users (in 'data/userdata.csv') and their electricity consumption (in 'data/consumption/{user_id}.csv').
@@ -25,3 +26,12 @@ or
 http://localhost:8000/summary/?start_date=2016-08-12&end_date=2016-08-20
 
 (shared screen captures of web pages-graphs)
+
+
+![alt text](https://github.com/kul-amr/sample_project_Django/blob/master/summary_popup.png)
+
+
+![alt text](https://github.com/kul-amr/sample_project_Django/blob/master/summary_screen.png)
+
+
+![alt text](https://github.com/kul-amr/sample_project_Django/blob/master/detail_screen.png)
